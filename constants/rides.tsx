@@ -5,7 +5,7 @@ import { useNavigation } from "@react-navigation/native"; // Use navigation for 
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "@/types/navigation"; // Import the types
 
-import { icons } from "@/constants";
+import { icons } from "@/constants/index";
 
 const UploadImage = () => {
     const [imageUri, setImageUri] = useState<string | null>(null);

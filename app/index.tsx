@@ -4,7 +4,7 @@ import { useAuth } from "@clerk/clerk-expo";
 const Home = () => {
   const { isSignedIn } = useAuth();
 
-  return <Redirect href={"/(root)/(tabs)/splash"} />;
+  return <Redirect href={"/(root)/splash"} />;
 
   if (isSignedIn) {
     return <Redirect href={"/(root)/(tabs)/home"} />;

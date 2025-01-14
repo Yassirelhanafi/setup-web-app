@@ -34,6 +34,16 @@ import signUpCar from "@/assets/images/signup-car.png";
 import splash from "@/assets/images/splash.png";
 import fond from "@/assets/images/fond.png";
 import fondmaps from "@/assets/images/fondmaps.png";
+import elhouat from "@/assets/images/elhouat.png";
+import notifications from "@/assets/icons/notifications.png";
+import wallet from "@/assets/icons/wallet.png";
+import support from "@/assets/icons/support.png";
+import walletActive from "@/assets/icons/walletActive.png";
+import homeActive from "@/assets/icons/homeActive.png";
+import supportActive from "@/assets/icons/supportActive.png";
+import masterCardLogo from "@/assets/images/masterCardLogo.png";
+import VisaLogo from "@/assets/images/VisaLogo.png";
+
 
 export const images = {
   onboarding1,
@@ -47,6 +57,9 @@ export const images = {
   fond,
   splash,
   fondmaps,
+  elhouat,
+  masterCardLogo,
+  VisaLogo
 };
 
 export const icons = {
@@ -75,6 +88,14 @@ export const icons = {
   star,
   target,
   to,
+  notifications,
+  wallet,
+  support,
+  homeActive,
+  walletActive,
+  supportActive,
+
+
 };
 
 export const onboarding = {

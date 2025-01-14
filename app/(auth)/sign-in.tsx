@@ -27,7 +27,7 @@ const SignIn = () => {
       // and redirect the user
       if (signInAttempt.status === 'complete') {
         await setActive({ session: signInAttempt.createdSessionId })
-        router.replace('/')
+        router.replace('/(root)/(tabs)/home')
       } else {
         // If the status isn't complete, check why. User might need to
         // complete further steps.
@@ -40,14 +40,17 @@ const SignIn = () => {
     }
   }, [isLoaded, form.email, form.password ]);
   return (
-    <ScrollView className="flex-1 bg-white">
-      <View className="flex-1 bg-white">
-        <View className="relative w-full h-[250ps]">
-          <Image source={images.signUpCar} className="z-0 w-full h-[250px]" />
-          <Text className="text-2xl text-black font-JakartaBold absolute bottom-5 left-5 ">
-            Welcome
-          </Text>
-        </View>
+      <ScrollView className="flex-1 bg-white">
+        <View className="w-full px-5">
+        <View className="flex-1 bg-white justify-center items-center">
+          <View className="flex justify-center items-center w-full h-[100px]">
+            <Text className="text-2xl text-primary-500 font-JakartaSemiBold mt-2 mb-1">
+              Welcome Back
+            </Text>
+            <Text className="text-base text-center text-gray-700 font-JakartaSemiBold">
+              Log in and continue your delivery journey!
+            </Text>
+          </View>
 
         <View className="flex justify-center items-center p-5">
           <InputField
@@ -72,8 +75,6 @@ const SignIn = () => {
             className="mt-8"
           />
 
-          <OAuth />
-
           <Link
             href="/sign-up"
             className="text-lg text-center text-general-200 mt-10"
@@ -83,6 +84,7 @@ const SignIn = () => {
           </Link>
         </View>
       </View>
+        </View>
     </ScrollView>
   );
 };

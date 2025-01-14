@@ -1,12 +1,9 @@
 import {SignedIn, SignedOut, useAuth, useUser} from "@clerk/clerk-expo";
 import {Link, router} from "expo-router";
-import {Text,Image, TouchableOpacity, View} from "react-native";
-import CustomButton from "@/components/CustomButton";
-import {useSignOutContext} from "@clerk/clerk-js/dist/types/ui/contexts";
-import {SignOutButton} from "@clerk/clerk-react";
+import {Text, Image, TouchableOpacity, View, ScrollView} from "react-native";
 import {icons} from "@/constants";
 
-export default function Page() {
+export default function Home() {
     const { user } = useUser();
     const { signOut } = useAuth();
 
@@ -16,10 +13,11 @@ export default function Page() {
         router.replace("/(auth)/sign-in");
     };
 
-    const handleCamera = () => {
-        router.replace("/(root)/(tabs)/rides");
-    }
+
+
+
     return (
+        <ScrollView className="bg-white">
         <View>
             <SignedIn>
                 <Text>Hello {user?.emailAddresses[0].emailAddress}</Text>
@@ -30,12 +28,7 @@ export default function Page() {
                     <Image source={icons.out} className="w-4 h-4" />
                 </TouchableOpacity>
 
-                <TouchableOpacity
-                    onPress={handleCamera}
-                    className="justify-center items-center w-10 h-10 rounded-full bg-white"
-                >
-                    hay
-                </TouchableOpacity>
+
             </SignedIn>
             <SignedOut>
                 <Link href="/sign-in">
@@ -46,5 +39,6 @@ export default function Page() {
                 </Link>
             </SignedOut>
         </View>
+        </ScrollView>
     );
 }
