@@ -43,6 +43,19 @@ import homeActive from "@/assets/icons/homeActive.png";
 import supportActive from "@/assets/icons/supportActive.png";
 import masterCardLogo from "@/assets/images/masterCardLogo.png";
 import VisaLogo from "@/assets/images/VisaLogo.png";
+import openeye from "@/assets/icons/openeye.png";
+import eyeclose from "@/assets/icons/eyeclose.png";
+import camion from "@/assets/images/camion.png";
+import moto from "@/assets/images/moto.png";
+import box from "@/assets/icons/box.png";
+import Currentlockation from "@/assets/icons/Currentlocation.png";
+import user from "@/assets/icons/User.png";
+import phone from "@/assets/icons/Phone.png";
+import Location from "@/assets/icons/Location.png";
+import Calendar from "@/assets/icons/Calendar.png";
+import Clock from "@/assets/icons/Clock.png";
+import GreyUser from "@/assets/icons/User_Grey.png";
+import Gear from "@/assets/icons/Gear.png";
 
 
 export const images = {
@@ -59,7 +72,9 @@ export const images = {
   fondmaps,
   elhouat,
   masterCardLogo,
-  VisaLogo
+  VisaLogo,
+  moto,
+  camion,
 };
 
 export const icons = {
@@ -94,8 +109,17 @@ export const icons = {
   homeActive,
   walletActive,
   supportActive,
-
-
+  openeye,
+  eyeclose,
+  box,
+  Location,
+  user,
+  phone,
+  Currentlockation,
+  Calendar,
+  Clock,
+  GreyUser,
+  Gear,
 };
 
 export const onboarding = {

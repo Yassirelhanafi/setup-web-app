@@ -13,12 +13,13 @@ import {
 import { icons, images } from "@/constants";
 import { useNavigation } from "expo-router";
 import CustomButton from "@/components/CustomButton";
+import {useUser} from "@clerk/clerk-expo";
 
 const Wallet = () => {
     const navigation = useNavigation();
     const router = useRouter();
-
-    const [user, setUser] = useState<string>("Guest");
+    const {user} =useUser();
+    const [userName, setUser] = useState<string>("Guest");
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     const [solde ,setSolde] = useState<number>(0);
@@ -28,14 +29,13 @@ const Wallet = () => {
         setShowSolde(!showSolde);
     }
 
-    // Fetch user data by ID
     const fetchUserById = async () => {
         try {
             setIsLoading(true);
             setError(null);
 
-            const userId = "6759c298379dca445eb791f6"; // Replace with dynamic user ID if needed
-            const response = await fetch(`http://192.168.219.192:8080/api/users/${userId}`);
+            const userId = user?.id;
+            const response = await fetch(`http://localhost:8080/api/users/${userId}`);
 
             if (!response.ok) {
                 throw new Error("Failed to fetch user data.");
@@ -71,7 +71,7 @@ const Wallet = () => {
                     <ActivityIndicator size="small" color="#000" />
                 ) : (
                     <Text className="text-xl font-bold">
-                        Hello, {user}!
+                        Hello, {userName}!
                     </Text>
                 )}
                 <TouchableOpacity>

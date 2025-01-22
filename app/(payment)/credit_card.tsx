@@ -13,10 +13,13 @@ import {
 import { icons } from "@/constants";
 import { useNavigation } from "expo-router";
 import axios from "axios";
+import { useStripe } from "@stripe/stripe-react-native";  // Import Stripe
 
 const CreditCard = () => {
     const navigation = useNavigation();
     const router = useRouter();
+
+    const { confirmPayment, initPaymentSheet } = useStripe();  // Initialize Stripe methods
 
     const [user, setUser] = useState<string>("Guest");
     const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -38,11 +41,11 @@ const CreditCard = () => {
             setIsLoading(true);
             setError(null);
 
-            const userId = "6759c298379dca445eb791f6"; // Remplacer par l'ID utilisateur dynamique
-            const response = await fetch(`http://192.168.219.192:8080/api/users/${userId}`);
+            const userId = "6759c298379dca445eb791f6"; // Replace with actual dynamic user ID
+            const response = await fetch(`http://127.0.0.1:8080/api/users/${userId}`);
 
             if (!response.ok) {
-                throw new Error("Échec de la récupération des données utilisateur.");
+                throw new Error("Failed to fetch user data.");
             }
 
             const data = await response.json();
@@ -54,8 +57,8 @@ const CreditCard = () => {
                 setSolde(0);
             }
         } catch (err: any) {
-            console.error("Erreur de récupération des données utilisateur:", err);
-            setError("Impossible de charger les données utilisateur. Veuillez réessayer.");
+            console.error("Error fetching user data:", err);
+            setError("Unable to load user data. Please try again.");
             setUser("Guest");
         } finally {
             setIsLoading(false);
@@ -64,14 +67,14 @@ const CreditCard = () => {
 
     const handleSubmit = async () => {
         if (!amount || !cardNumber || !expiryDate || !cvv) {
-            Alert.alert("Erreur", "Tous les champs sont obligatoires.");
+            Alert.alert("Error", "All fields are required.");
             return;
         }
 
         try {
-            // Préparation des données à envoyer au backend
+            // Prepare data to send to the backend
             const chargeRequest = {
-                amount: parseInt(amount) /11,
+                amount: parseInt(amount) / 11,  // Adjust amount as needed
                 cardNumber,
                 expiryDate,
                 cvv
@@ -79,17 +82,29 @@ const CreditCard = () => {
 
             setIsLoading(true);
 
-            const response = await axios.post('http://192.168.219.192:8080/charge', chargeRequest);
+            // Make request to backend to create payment intent and ephemeral key
+            const response = await axios.post('http://127.0.0.1:8080/charge', chargeRequest);
 
             if (response.data) {
-                const { id, status, balanceTransaction } = response.data;
-                Alert.alert("Succès du paiement", `Paiement réussi. ID: ${id}, Statut: ${status}`);
-                // Navigation vers une autre page après le paiement réussi
-                // navigation.navigate('SomePage');
+                const { ephemeralKey, paymentIntent } = response.data;
+
+                // Now confirm payment using ephemeral key and payment intent
+                const { error, paymentIntent: confirmedPaymentIntent } = await confirmPayment(paymentIntent, {
+                    paymentMethodType: 'Card',
+                    // ephemeralKey: ephemeralKey.id, // Pass the ephemeral key ID here
+                });
+
+                if (error) {
+                    Alert.alert("Payment Error", error.message);
+                } else if (confirmedPaymentIntent) {
+                    Alert.alert("Payment Success", `Payment successful. ID: ${confirmedPaymentIntent.id}`);
+                    // After successful payment, you can navigate to another page
+                    // navigation.navigate('SomePage');
+                }
             }
         } catch (error) {
-            console.error("Erreur lors de l'envoi du paiement:", error);
-            Alert.alert("Échec du paiement", "Une erreur est survenue lors du traitement de votre paiement. Veuillez réessayer.");
+            console.error("Payment error:", error);
+            Alert.alert("Payment Failed", "An error occurred during payment. Please try again.");
         } finally {
             setIsLoading(false);
         }
@@ -105,7 +120,7 @@ const CreditCard = () => {
                 <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
                     <TouchableOpacity onPress={() => router.push("/(root)/(tabs)/Wallet")} style={{ flexDirection: "row", alignItems: "center" }}>
                         <Image source={icons.backArrow} style={{ width: 24, height: 24, marginRight: 10 }} />
-                        <Text style={{ fontSize: 18, fontWeight: "bold" }}>Recharger votre porte-monnaie</Text>
+                        <Text style={{ fontSize: 18, fontWeight: "bold" }}>Recharge Your Wallet</Text>
                     </TouchableOpacity>
                     <TouchableOpacity>
                         <Image source={icons.list} style={{ width: 48, height: 48 }} />
@@ -120,7 +135,7 @@ const CreditCard = () => {
                     </TouchableOpacity>
                 </View>
 
-                <Text style={styles.title}>Entrez le montant</Text>
+                <Text style={styles.title}>Enter Amount</Text>
                 <TextInput
                     placeholder="Minimum 50Dh"
                     value={amount}
@@ -129,9 +144,9 @@ const CreditCard = () => {
                     keyboardType="numeric"
                 />
 
-                <Text style={styles.title}>Numéro de carte</Text>
+                <Text style={styles.title}>Card Number</Text>
                 <TextInput
-                    placeholder="Entrez le numéro de la carte"
+                    placeholder="Enter card number"
                     value={cardNumber}
                     onChangeText={setCardNumber}
                     style={styles.input}
@@ -140,9 +155,9 @@ const CreditCard = () => {
 
                 <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
                     <View style={{ flex: 1 }}>
-                        <Text style={styles.title}>Date d'expiration</Text>
+                        <Text style={styles.title}>Expiration Date</Text>
                         <TextInput
-                            placeholder="MM/AA"
+                            placeholder="MM/YY"
                             value={expiryDate}
                             onChangeText={setExpiryDate}
                             style={[styles.input]}
@@ -152,7 +167,7 @@ const CreditCard = () => {
                     <View style={{ flex: 1 }}>
                         <Text style={styles.title}>CVV</Text>
                         <TextInput
-                            placeholder="3 chiffres"
+                            placeholder="3 digits"
                             value={cvv}
                             onChangeText={setCvv}
                             style={[styles.input]}
@@ -160,6 +175,7 @@ const CreditCard = () => {
                         />
                     </View>
                 </View>
+
                 <View style={styles.container}>
                     <TouchableOpacity
                         style={{ backgroundColor: "#1D4ED8", paddingVertical: 14, borderRadius: 12, alignItems: "center", marginTop: 20 }}
@@ -167,7 +183,7 @@ const CreditCard = () => {
                         disabled={isLoading}
                     >
                         <Text style={{ color: "white", fontSize: 18, fontWeight: "bold" }}>
-                            {isLoading ? 'Traitement...' : 'Continuer'}
+                            {isLoading ? 'Processing...' : 'Continue'}
                         </Text>
                     </TouchableOpacity>
                 </View>

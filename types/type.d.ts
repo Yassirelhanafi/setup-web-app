@@ -9,11 +9,15 @@ declare interface Driver {
   car_seats: number;
   rating: number;
 }
-
+declare interface Order {
+  id: string;
+  destination: string;
+  status: string;
+  date: Date;
+}
 declare interface MarkerData {
   latitude: number;
   longitude: number;
-  id: number;
   title: string;
   profile_image_url: string;
   car_image_url: string;
@@ -68,10 +72,10 @@ declare interface GoogleInputProps {
   containerStyle?: string;
   textInputBackgroundColor?: string;
   handlePress: ({
-    latitude,
-    longitude,
-    address,
-  }: {
+                  latitude,
+                  longitude,
+                  address,
+                }: {
     latitude: number;
     longitude: number;
     address: string;
@@ -105,19 +109,19 @@ declare interface LocationStore {
   destinationLongitude: number | null;
   destinationAddress: string | null;
   setUserLocation: ({
-    latitude,
-    longitude,
-    address,
-  }: {
+                      latitude,
+                      longitude,
+                      address,
+                    }: {
     latitude: number;
     longitude: number;
     address: string;
   }) => void;
   setDestinationLocation: ({
-    latitude,
-    longitude,
-    address,
-  }: {
+                             latitude,
+                             longitude,
+                             address,
+                           }: {
     latitude: number;
     longitude: number;
     address: string;

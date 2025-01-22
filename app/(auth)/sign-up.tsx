@@ -3,25 +3,41 @@ import { Link, router } from "expo-router";
 import { useState } from "react";
 import { Alert, Image, ScrollView, Text, View } from "react-native";
 import { ReactNativeModal } from "react-native-modal";
+import * as ImagePicker from "expo-image-picker";
 
 import CustomButton from "@/components/CustomButton";
 import InputField from "@/components/InputField";
-import OAuth from "@/components/OAuth";
 import { icons, images } from "@/constants";
-import { createAccount } from "@/lib/fetch";
+import {createAccount, createUser} from "@/lib/fetch";
 import PhoneNumberInput from "@/components/PhoneNumberInput";
 
 const SignUp = () => {
   const { isLoaded, signUp, setActive } = useSignUp();
+  const [showModal, setShowModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [iduser, setIduser] = useState<string | null>(null);
 
-  const [form, setForm] = useState({
+
+  const [form, setForm] = useState<{
+    name: string;
+    phone: string;
+    email: string;
+    password: string;
+    confirmPassword: string;
+    cin: string;
+    idCard: { uri: string; name: string; type: string } | null;
+    profilePicture: { uri: string; name: string; type: string } | null;
+  }>({
     name: "",
     phone: "",
     email: "",
     password: "",
     confirmPassword: "",
+    cin: "",
+    idCard: null,
+    profilePicture: null,
   });
+
 
   const [verification, setVerification] = useState({
     state: "default",
@@ -30,6 +46,7 @@ const SignUp = () => {
   });
 
   const [passwordMatchError, setPasswordMatchError] = useState("");
+  const [userid, setUserid] = useState<string | null>(null);
 
   const handlePasswordChange = (value: string) => {
     setForm({ ...form, password: value });
@@ -49,6 +66,33 @@ const SignUp = () => {
     }
   };
 
+  const handleImagePicker = async (type: string) => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.5,
+    });
+
+    if (!result.canceled) {
+      const pickedImage = result.assets[0]; // This contains the image details
+
+      // Build the image object with `uri`, `name`, and `type`
+      const image = {
+        uri: pickedImage.uri,
+        name: pickedImage.uri.split("/").pop() || "image.jpg", // Extract the file name or set a default
+        type: "image/jpeg", // Set a default type
+      };
+
+      if (type === "idCard") {
+        setForm({ ...form, idCard: image });
+      } else if (type === "profilePicture") {
+        setForm({ ...form, profilePicture: image });
+      }
+    }
+  };
+
+
   const onSignUpPress = async () => {
     if (!form.password || !form.confirmPassword || passwordMatchError) {
       Alert.alert("Error", "Please make sure passwords match.");
@@ -63,15 +107,14 @@ const SignUp = () => {
         password: form.password,
       });
       await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
-      setVerification({
-        ...verification,
-        state: "pending",
-      });
-    } catch (err: any) {
+      setVerification({ ...verification, state: "pending" });
+    } catch (err) {
       console.log(JSON.stringify(err, null, 2));
-      Alert.alert("Error", err.errors[0].longMessage);
+      Alert.alert("Error");
     }
   };
+
+
 
   const onPressVerify = async () => {
     if (!isLoaded) return;
@@ -82,33 +125,51 @@ const SignUp = () => {
       });
 
       if (completeSignUp.status === "complete") {
+        const userId = completeSignUp.createdUserId;
+        setIduser(userId);
+
         await createAccount({
-          name: form.name,
+          fullname: form.name,
           email: form.email,
           phone: form.phone,
-          clerkId: "11111",
+          clerkId: userId,
         });
 
+        setUserid(userId);
         await setActive({ session: completeSignUp.createdSessionId });
-        setVerification({
-          ...verification,
-          state: "success",
-        });
+
+        setVerification({ ...verification, state: "success" });
+        setShowModal(true);
       } else {
-        setVerification({
-          ...verification,
-          error: "Verification failed. Please try again.",
-          state: "failed",
-        });
+        setVerification({ ...verification, error: "Verification failed.", state: "failed" });
       }
-    } catch (err: any) {
-      setVerification({
-        ...verification,
-        error: err.errors[0].longMessage,
-        state: "failed",
-      });
+    } catch (err) {
+      setVerification({ ...verification, error: "verification failed", state: "failed" });
     }
   };
+
+  const onAdditionalInfoSubmit = async () => {
+    if (!form.cin || !form.idCard || !form.profilePicture) {
+      Alert.alert("Error", "All fields are required.");
+      return;
+    }
+    await createUser({
+      name: form.name,
+      email: form.email,
+      phone: form.phone,
+      clerkId: iduser,
+      numCIN: form.cin,
+      imageCIN: form.idCard,
+      imageProfile: form.profilePicture
+    })
+
+    setIduser(iduser)
+    setShowModal(false);
+    setVerification({ ...verification, state: "success2" });
+    setShowSuccessModal(true);
+  };
+
+
 
   return (
       <ScrollView className="flex-1 bg-white">
@@ -187,7 +248,7 @@ const SignUp = () => {
               isVisible={verification.state === "pending"}
               onModalHide={() => {
                 if (verification.state === "success") {
-                  setShowSuccessModal(true);
+                  setShowModal(true);
                 }
               }}
           >
@@ -220,6 +281,72 @@ const SignUp = () => {
               />
             </View>
           </ReactNativeModal>
+
+
+          <ReactNativeModal
+              isVisible={showModal}
+              onModalHide={() => {
+                if (verification.state === "success2") {
+                }
+              }}
+          >
+            <View className="bg-white px-7 py-9 rounded-2xl min-h-[400px]">
+              <Text className="font-JakartaExtraBold text-2xl mb-2">
+                Required Information
+              </Text>
+              <Text className="font-Jakarta mb-5">
+                Please provide the additional required information to complete your account setup.
+              </Text>
+
+              <InputField
+                  label={"CIN (National ID Number)"}
+                  icon={icons.lock}
+                  placeholder={"Enter your CIN"}
+                  value={form.cin}
+                  onChangeText={(cin) => setForm({ ...form, cin })}
+              />
+
+              <View className="mt-5">
+                <Text className="font-JakartaSemiBold text-base mb-1">
+                  Upload National ID Card
+                </Text>
+                <CustomButton
+                    title="Choose from Gallery"
+                    onPress={() => handleImagePicker("idCard")}
+                />
+                {form.idCard && (
+                    <Image
+                        source={{ uri: form.idCard?.uri }}
+                        className="w-full h-[150px] mt-3 rounded-md"
+                    />
+                )}
+              </View>
+
+              <View className="mt-5">
+                <Text className="font-JakartaSemiBold text-base mb-1">
+                  Upload Profile Picture
+                </Text>
+                <CustomButton
+                    title="Choose from Gallery"
+                    onPress={() => handleImagePicker("profilePicture")}
+                />
+                {form.profilePicture && (
+                    <Image
+                        source={{ uri: form.profilePicture?.uri }}
+                        className="w-[150px] h-[150px] mt-3 rounded-full mx-auto"
+                    />
+                )}
+              </View>
+
+              <CustomButton
+                  title="Submit"
+                  onPress={onAdditionalInfoSubmit}
+                  className="mt-5 bg-success-500"
+              />
+            </View>
+          </ReactNativeModal>
+
+
           <ReactNativeModal isVisible={showSuccessModal}>
             <View className="bg-white px-7 py-9 rounded-2xl min-h-[300px]">
               <Image
@@ -234,7 +361,9 @@ const SignUp = () => {
               </Text>
               <CustomButton
                   title="Browse Home"
-                  onPress={() => router.push(`/(root)/(tabs)/home`)}
+                  onPress={() => router.push({ pathname: `/(root)/(tabs)/home`
+                  }
+                    )}
                   className="mt-5"
               />
             </View>

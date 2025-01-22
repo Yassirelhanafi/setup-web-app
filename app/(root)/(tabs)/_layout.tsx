@@ -6,12 +6,12 @@ const TabIcon = ({
                      activeSource,
                      inactiveSource,
                      focused,
-                     label,  // Nouveau paramètre pour le texte du label
+                     label,
                  }: {
     activeSource: ImageSourcePropType;
     inactiveSource: ImageSourcePropType;
     focused: boolean;
-    label: string;  // Le texte du label sous l'icône
+    label: string;
 }) => (
     <View style={styles.iconContainer}>
         {focused && <View style={styles.activeIndicator} />}
@@ -113,10 +113,10 @@ const styles = StyleSheet.create({
     },
     iconLabel: {
         fontSize: 13,
-        marginTop: 4, // Espacement entre l'icône et le label
+        marginTop: 4,
         fontWeight: "500",
-        flexWrap: "nowrap", // Empêche le texte de se couper
-        textAlign: "center", // Centre le texte
+        flexWrap: "nowrap",
+        textAlign: "center",
     },
     activeIndicator: {
         position: "absolute",

@@ -1,5 +1,13 @@
+import { NavigatorScreenParams } from "@react-navigation/native";
+
 export type RootStackParamList = {
-    UploadImage: undefined;
-    Dummy: { message: string; imageUri: string };
-    // Ajoutez d'autres routes ici
+    NewOrder: undefined;
+    PackageInfo: { message: string; imageUri?: string };
+    Test: { imageUri: string };
 };
+
+declare global {
+    namespace ReactNavigation {
+        interface RootParamList extends RootStackParamList {}
+    }
+}

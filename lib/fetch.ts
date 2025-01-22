@@ -12,17 +12,17 @@ export const fetchAPI = async (url: string, options?: RequestInit) => {
     throw error;
   }
 };
-export const API_BASE_URL = "http://192.168.219.192:8080/api";
+export const API_BASE_URL = "http://192.168.138.196:8080/api";
 
 export const createAccount = async (user: {
-  name: string;
+  fullname: string;
   email: string;
   phone: string;
   clerkId: string | null;
 }) => {
   try {
     const response = await fetchAPI(
-      `${API_BASE_URL}/accounts/register?fullName=${user.name}&email=${user.email}&phone=${user.phone}&clerkId=${user.clerkId}`,
+      `${API_BASE_URL}/accounts/register?fullName=${user.fullname}&email=${user.email}&phone=${user.phone}&clerkId=${user.clerkId}`,
       {
         method: "POST",
         headers: {
@@ -37,6 +37,55 @@ export const createAccount = async (user: {
     console.error("Error creating account:", error);
   }
 };
+
+export const createUser = async (user: {
+  name: string;
+  email: string;
+  phone: string;
+  clerkId: string | null;
+  numCIN: string;
+  imageCIN: { uri: string; name: string; type: string };
+  imageProfile: { uri: string; name: string; type: string };
+}) => {
+  try {
+    const formData = new FormData();
+    formData.append("fullName", user.name);
+    formData.append("email", user.email);
+    formData.append("phone", user.phone);
+    formData.append("clerkId", user.clerkId || "");
+    formData.append("numeroCIN", user.numCIN);
+    formData.append("imageCIN", {
+      uri: user.imageCIN.uri,
+      name: user.imageCIN.name,
+      type: user.imageCIN.type,
+    }as any);
+    formData.append("imageProfile", {
+      uri: user.imageProfile.uri,
+      name: user.imageProfile.name,
+      type: user.imageProfile.type,
+    } as any);
+
+    // Send the request
+    const response = await fetch(`${API_BASE_URL}/users/register`, {
+      method: "POST",
+
+      body: formData,
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to create user");
+    }
+
+    console.log("user created:", data);
+  } catch (error) {
+    console.error("Error creating user:", error);
+  }
+};
+
+
+
 
 export const useFetch = <T>(url: string, options?: RequestInit) => {
   const [data, setData] = useState<T | null>(null);
